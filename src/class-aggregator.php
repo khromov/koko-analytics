@@ -86,7 +86,7 @@ class Aggregator {
 		}
 
 		// read and ignore first line (the PHP header that prevents direct file access)
-		fgets( $file_handle, 1024 );
+		fgets( $file_handle, 1024 ); // TODO: Should we really have 1024 here?
 
 		// combine stats for each table
 		$site_stats     = array(
@@ -95,6 +95,7 @@ class Aggregator {
 		);
 		$post_stats     = array();
 		$referrer_stats = array();
+		$utm_stats      = array();
 
 		while ( ( $line = fgets( $file_handle, 1024 ) ) !== false ) {
 			$line = rtrim( $line );
@@ -102,11 +103,20 @@ class Aggregator {
 				continue;
 			}
 
-			$p               = explode( ',', $line );
+			$p               = json_decode($line);
 			$post_id         = (int) $p[0];
 			$new_visitor     = (int) $p[1];
 			$unique_pageview = (int) $p[2];
-			$referrer_url    = trim( $p[3] );
+			$referrer_url    = (string) $p[3];
+
+			// utm
+			// $utm_source, $utm_medium, $utm_campaign, $utm_term, $utm_content
+			// [1,0,0,"","google,google2","email","spring_sale","running shoes","topbarlogo"]
+			$utm_source    = (string) $p[4];
+			$utm_medium    = (string) $p[5];
+			$utm_campaign  = (string) $p[6];
+			$utm_term      = (string) $p[7];
+			$utm_content   = (string) $p[8];
 
 			// update site stats
 			$site_stats['pageviews'] += 1;
@@ -147,6 +157,18 @@ class Aggregator {
 					$referrer_stats[ $referrer_url ]['visitors'] += 1;
 				}
 			}
+
+			// update utm stats
+			/*
+			utm_stats = {
+				source = {
+					google = {
+						pageviews = 12
+						visitors = 18
+					}
+				}
+			}
+			*/
 		}
 
 		// close file & remove it from filesystem
