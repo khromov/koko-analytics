@@ -24,7 +24,13 @@ function collect_request() {
 	$post_id         = (int) $_GET['p'];
 	$referrer        = isset( $_GET['r'] ) ? trim( $_GET['r'] ) : '';
 
-	$success = isset( $_GET['test'] ) ? test_collect_in_file() : collect_in_file( $post_id, $unique_visitor, $unique_pageview, $referrer );
+	$utm_source      = isset( $_GET['utm_source'] ) ? trim( $_GET['utm_source'] ) : '';
+	$utm_medium      = isset( $_GET['utm_medium'] ) ? trim( $_GET['utm_medium'] ) : '';
+	$utm_campaign    = isset( $_GET['utm_campaign'] ) ? trim( $_GET['utm_campaign'] ) : '';
+	$utm_term        = isset( $_GET['utm_term'] ) ? trim( $_GET['utm_term'] ) : '';
+	$utm_content     = isset( $_GET['utm_content'] ) ? trim( $_GET['utm_content'] ) : '';
+
+	$success = isset( $_GET['test'] ) ? test_collect_in_file() : collect_in_file( $post_id, $unique_visitor, $unique_pageview, $referrer, $utm_source, $utm_medium, $utm_campaign, $utm_term, $utm_content );
 
 	// set OK headers & prevent caching
 	if ( ! $success ) {
@@ -65,7 +71,7 @@ function get_buffer_filename() {
 	return rtrim( $uploads['basedir'], '/' ) . '/pageviews.php';
 }
 
-function collect_in_file( $post_id, $is_new_visitor, $is_unique_pageview, $referrer = '' ) {
+function collect_in_file( $post_id, $is_new_visitor, $is_unique_pageview, $referrer = '', $utm_source = '', $utm_medium = '', $utm_campaign = '', $utm_term = '', $utm_content = '' ) {
 	$filename = get_buffer_filename();
 
 	// if file does not yet exist, add PHP header to prevent direct file access
@@ -76,7 +82,7 @@ function collect_in_file( $post_id, $is_new_visitor, $is_unique_pageview, $refer
 	}
 
 	// append data to file
-	$line = join( ',', array( $post_id, $is_new_visitor, $is_unique_pageview, $referrer ) );
+	$line = json_encode( array( $post_id, $is_new_visitor, $is_unique_pageview, $referrer, $utm_source, $utm_medium, $utm_campaign, $utm_term, $utm_content ) );
 	$content .= $line . PHP_EOL;
 	return file_put_contents( $filename, $content, FILE_APPEND );
 }
