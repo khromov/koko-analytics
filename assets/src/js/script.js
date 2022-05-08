@@ -80,6 +80,11 @@ window.addEventListener('load', function () {
       }
     }
 
+    // add utm tracking
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const queryParams = Object.fromEntries(urlSearchParams.entries());
+    const { utm_source = null, utm_medium = null, utm_campaign = null, utm_term = null, utm_content = null  } = queryParams;
+
     const img = document.createElement('img')
     img.style.display = 'none'
     img.onload = function () {
@@ -101,6 +106,26 @@ window.addEventListener('load', function () {
     queryStr += '&nv=' + (isNewVisitor ? '1' : '0')
     queryStr += '&up=' + (isUniquePageview ? '1' : '0')
     queryStr += '&r=' + encodeURIComponent(referrer)
+
+    if(utm_source) {
+      queryStr += '&utm_source=' + encodeURIComponent(utm_source)
+    }
+
+    if(utm_medium) {
+      queryStr += '&utm_medium=' + encodeURIComponent(utm_medium)
+    }
+
+    if(utm_campaign) {
+      queryStr += '&utm_campaign=' + encodeURIComponent(utm_campaign)
+    }
+
+    if(utm_term) {
+      queryStr += '&utm_term=' + encodeURIComponent(utm_term)
+    }
+
+    if(utm_content) {
+      queryStr += '&utm_content=' + encodeURIComponent(utm_content)
+    }
 
     // append random query parameter to avoid this request from being cached
     queryStr += '&rqp=' + Math.random().toString(36).substr(2)
